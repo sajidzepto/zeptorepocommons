@@ -1,6 +1,7 @@
 package zeptobaserepo
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"reflect"
 )
@@ -17,7 +18,8 @@ type CrudRepo interface {
 }
 
 var (
-	CreateBatchSize int
+	DefaultBatchCreateSize int
+	DefaultPageSize        int
 )
 
 type BaseRepo struct {
@@ -26,7 +28,8 @@ type BaseRepo struct {
 }
 
 func getRepo(db *gorm.DB, typ reflect.Type) *BaseRepo {
-	CreateBatchSize = 100
+	DefaultBatchCreateSize = 100
+	DefaultPageSize = 100
 	return &BaseRepo{db: db, baseModelType: typ}
 }
 
@@ -39,7 +42,7 @@ func (bmr *BaseRepo) Create(value interface{}) error {
 }
 
 func (bmr *BaseRepo) BatchCreate(value interface{}) error {
-	result := bmr.db.CreateInBatches(value, CreateBatchSize)
+	result := bmr.db.CreateInBatches(value, DefaultBatchCreateSize)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -55,13 +58,26 @@ func (bmr *BaseRepo) FindById(id uint) (interface{}, error) {
 	return value, nil
 }
 
-func (bmr *BaseRepo) FindAll() (interface{}, error) {
-	values := reflect.MakeSlice(reflect.SliceOf(bmr.baseModelType), 10, 10).Interface()
-	result := bmr.db.Find(&values)
+// FindAll finds all the instances of the model.
+// The first and only argument is the offset
+func (bmr *BaseRepo) FindAll(params ...int) (*PaginatorQueryResult, error) {
+
+	values := reflect.MakeSlice(reflect.SliceOf(bmr.baseModelType), 0, 0).Interface()
+	var offset, nextOffset int
+	switch len(params) {
+	case 0:
+		offset = 0
+	case 1:
+		offset = params[0]
+	default:
+		return nil, errors.New("specified more number of arguments than specified")
+	}
+	nextOffset = offset + DefaultPageSize + 1
+	result := bmr.db.Offset(offset).Limit(DefaultPageSize).Find(&values)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return values, nil
+	return &PaginatorQueryResult{values, nextOffset}, nil
 }
 
 func (bmr *BaseRepo) Update(value interface{}) error {
@@ -74,6 +90,7 @@ func (bmr *BaseRepo) Update(value interface{}) error {
 
 func (bmr *BaseRepo) UpdateSpecificFields(id uint, fields map[string]interface{}) error {
 
+	// do this in continuous session mode
 	res, _ := bmr.FindById(id)
 	if res != nil {
 		result := bmr.db.Model(res).Updates(fields)
