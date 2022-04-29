@@ -2,24 +2,95 @@ package zeptobaserepo
 
 import "strings"
 
-type QueryConfig struct {
-	fields string
+type Query struct {
+	queryCondition *QueryCondition
+	pageConfig     *PageConfig
 }
 
-type AssociationConfigs struct {
+type QueryCondition struct {
+	orConditions []OrConditions
 }
 
+type PageConfig struct {
+	orderBy map[string]string
+	offset  int
+	limit   int
+}
+
+type PaginatorQueryResult struct {
+	values     interface{}
+	nextOffset int
+}
+
+//Can modify this condition to return gorm clauses instead of strings
 type Condition interface {
 	getPreparedStatement() (string, interface{})
 }
 
-type SearchCondition struct {
-	orConditions []OrConditions
-	orderBy      *OrderBy
-	offset       int
+type AndConditions struct {
+	conditions []Condition
 }
 
-func (s SearchCondition) getPreparedStatement() (string, interface{}) {
+type OrConditions struct {
+	andConditions []AndConditions
+}
+
+// db.Where("name = ?", "jinzhu").First(&user)
+type SearchOperatorCondition struct {
+	field    string
+	operator string
+	value    interface{}
+}
+
+// db.Where("name IN ?", []string{"jinzhu", "jinzhu 2"}).Find(&users)
+type SearchInCondition struct {
+	field  string
+	values []interface{}
+}
+
+// db.Where("name LIKE ?", "%jin%").Find(&users)
+type SearchLikeCondition struct {
+	field string
+	regex string
+}
+
+//db.Where("created_at BETWEEN ? AND ?", lastWeek, today).Find(&users)
+type SearchBetweenCondition struct {
+	field      string
+	lowerValue interface{}
+	upperValue interface{}
+}
+
+func (s SearchOperatorCondition) getPreparedStatement() (string, interface{}) {
+	sb := strings.Builder{}
+	sb.WriteString(s.field + " ")
+	sb.WriteString(s.operator + " ? ")
+	return sb.String(), s.value
+}
+
+func (s SearchInCondition) getPreparedStatement() (string, interface{}) {
+	sb := strings.Builder{}
+	sb.WriteString(s.field + " ")
+	sb.WriteString("IN" + " ? ")
+	return sb.String(), s.values
+}
+
+func (s SearchLikeCondition) getPreparedStatement() (string, interface{}) {
+
+	sb := strings.Builder{}
+	sb.WriteString(s.field + " ")
+	sb.WriteString("LIKE" + " ? ")
+	return sb.String(), s.regex
+}
+
+func (s SearchBetweenCondition) getPreparedStatement() (string, interface{}) {
+	sb := strings.Builder{}
+	sb.WriteString(s.field + " ")
+	sb.WriteString("BETWEEN" + " ? AND ? ")
+	return sb.String(), []interface{}{s.lowerValue, s.upperValue}
+}
+
+func (s *QueryCondition) getPreparedStatement() (string, interface{}) {
 	sb := strings.Builder{}
 	var arguments []interface{}
 	for i, orC := range s.orConditions {
@@ -39,76 +110,4 @@ func (s SearchCondition) getPreparedStatement() (string, interface{}) {
 		}
 	}
 	return sb.String(), arguments
-}
-
-type AndConditions struct {
-	conditions []Condition
-}
-
-type OrConditions struct {
-	andConditions []AndConditions
-}
-
-// db.Where("name = ?", "jinzhu").First(&user)
-type SearchOperatorCondition struct {
-	field    string
-	operator string
-	value    interface{}
-}
-
-func (s SearchOperatorCondition) getPreparedStatement() (string, interface{}) {
-	sb := strings.Builder{}
-	sb.WriteString(s.field + " ")
-	sb.WriteString(s.operator + " ? ")
-	return sb.String(), s.value
-}
-
-// db.Where("name IN ?", []string{"jinzhu", "jinzhu 2"}).Find(&users)
-type SearchInCondition struct {
-	field  string
-	values []interface{}
-}
-
-func (s SearchInCondition) getPreparedStatement() (string, interface{}) {
-	sb := strings.Builder{}
-	sb.WriteString(s.field + " ")
-	sb.WriteString("IN" + " ? ")
-	return sb.String(), s.values
-}
-
-// db.Where("name LIKE ?", "%jin%").Find(&users)
-type SearchLikeCondition struct {
-	field string
-	regex string
-}
-
-func (s SearchLikeCondition) getPreparedStatement() (string, interface{}) {
-
-	sb := strings.Builder{}
-	sb.WriteString(s.field + " ")
-	sb.WriteString("LIKE" + " ? ")
-	return sb.String(), s.regex
-}
-
-//db.Where("created_at BETWEEN ? AND ?", lastWeek, today).Find(&users)
-type SearchBetweenCondition struct {
-	field      string
-	lowerValue interface{}
-	upperValue interface{}
-}
-
-func (s SearchBetweenCondition) getPreparedStatement() (string, interface{}) {
-	sb := strings.Builder{}
-	sb.WriteString(s.field + " ")
-	sb.WriteString("BETWEEN" + " ? AND ? ")
-	return sb.String(), []interface{}{s.lowerValue, s.upperValue}
-}
-
-type OrderBy struct {
-	order map[string]string
-}
-
-type PaginatorQueryResult struct {
-	values     interface{}
-	nextOffset int
 }
