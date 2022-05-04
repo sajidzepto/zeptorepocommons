@@ -9,26 +9,13 @@ import (
 	"testing"
 )
 
-type Rider struct {
-	gorm.Model
-	Name     string
-	Phone    string
-	VendorId uint
-	Vendor   RiderVendor
-}
-
-type RiderVendor struct {
-	gorm.Model
-	Name  string
-	Phone string
-}
-
-type RiderRepo struct {
-	*BaseRepo
-}
-
 var (
-	riderRepo *RiderRepo
+	riderRepo               *RiderRepo
+	riderEnvRepo            *RiderEnvRepo
+	riderVendorRepo         *RiderVendorRepo
+	identificationModelRepo *IdentificationModelRepo
+	addressRepo             *AddressRepo
+	storeModelRepo          *StoreModelRepo
 )
 
 func init() {
@@ -37,19 +24,54 @@ func init() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	//db.AutoMigrate(&Rider{}, &RiderVendor{})
+	//db.AutoMigrate(&Rider{}, &RiderVendor{}, &IdentificationModel{}, &AddressModel{}, &StoreModel{})
+	//db.AutoMigrate(&RiderEnv{})
 	riderRepo = &RiderRepo{getRepo(db, reflect.TypeOf(Rider{}))}
-
+	riderEnvRepo = &RiderEnvRepo{getRepo(db, reflect.TypeOf(Rider{}))}
+	riderVendorRepo = &RiderVendorRepo{getRepo(db, reflect.TypeOf(RiderVendor{}))}
+	identificationModelRepo = &IdentificationModelRepo{getRepo(db, reflect.TypeOf(IdentificationModel{}))}
+	addressRepo = &AddressRepo{getRepo(db, reflect.TypeOf(AddressModel{}))}
+	storeModelRepo = &StoreModelRepo{getRepo(db, reflect.TypeOf(StoreModel{}))}
 }
 
 func getSampleRider() *Rider {
 	return &Rider{
 		Name:  "Sajid",
 		Phone: "+91-9939879451",
-		Vendor: RiderVendor{
+		Vendor: &RiderVendor{
 			Name:  "Vendor",
 			Phone: "VendorPhone",
 		},
+	}
+}
+
+func getCompleteSampleRider() *Rider {
+	return &Rider{
+		Name:  "Sajid",
+		Phone: "+91-9939879451",
+		Vendor: &RiderVendor{
+			Name:  "Vendor",
+			Phone: "VendorPhone",
+		},
+		Identification: &IdentificationModel{
+			IdentificationType: "aadhar",
+			IdentificationId:   "randomId",
+		},
+		Addresses: []AddressModel{{
+			AddressString: "Bellandur",
+			City:          "Bangalore",
+			Pincode:       "560103",
+		}},
+		Stores: []StoreModel{{
+			Pincode: "560001",
+		}},
+	}
+}
+
+func getSampleVendor() *RiderVendor {
+	return &RiderVendor{
+		Name:  "Vendor",
+		Phone: "VendorPhone",
 	}
 }
 
@@ -58,8 +80,27 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
+func TestSample(t *testing.T) {
+
+}
+
 func TestBaseRepo_Create(t *testing.T) {
 	rider := getSampleRider()
+	err := riderRepo.Create(rider)
+	assert.Nil(t, err)
+}
+
+func TestBaseRepo_CreateRiderForAExistingVendor(t *testing.T) {
+	riderVendor := getSampleVendor()
+	riderVendorRepo.Create(riderVendor)
+	rider := getSampleRider()
+	rider.VendorId = riderVendor.ID
+	err := riderRepo.Create(rider)
+	assert.Nil(t, err)
+}
+
+func TestBaseRepo_CreateWithAllFields(t *testing.T) {
+	rider := getCompleteSampleRider()
 	err := riderRepo.Create(rider)
 	assert.Nil(t, err)
 }
@@ -158,7 +199,7 @@ func TestBaseRepo_DeleteAll(t *testing.T) {
 	riderRepo.Create(rider)
 	riderRepo.DeleteALl()
 	pgqr, err := riderRepo.FindAll(0)
+	t.Logf("The default page size is %d", DefaultPageSize)
 	assert.Nil(t, err)
 	assert.Equal(t, len(*(pgqr.values).(*[]Rider)), 0)
-
 }

@@ -3,13 +3,14 @@ module zeptobaserepo
 go 1.18
 
 require (
-	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.7.1
+	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.8.2
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/gorm v1.23.5
 )
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.8.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.12.0 // indirect

@@ -66,6 +66,7 @@ func (bmr BaseRepo) FindById(id uint) (any, error) {
 }
 
 func (bmr BaseRepo) FindAll(offset int) (*PaginatorQueryResult, error) {
+
 	values := reflect.New(reflect.SliceOf(bmr.baseModelType)).Interface()
 	nextOffset := offset + DefaultPageSize + 1
 	result := bmr.db.
@@ -143,7 +144,7 @@ func (bmr BaseRepo) Delete(value interface{}) error {
 
 func (bmr BaseRepo) DeleteALl() error {
 	value := reflect.New(bmr.baseModelType).Interface()
-	result := bmr.db.Where("1 = 1").Delete(&value)
+	result := bmr.db.Where("1 = 1").Delete(value)
 	if result.Error != nil {
 		return result.Error
 	}

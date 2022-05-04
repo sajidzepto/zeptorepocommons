@@ -22,7 +22,6 @@ type PaginatorQueryResult struct {
 	nextOffset int
 }
 
-//Can modify this condition to return gorm clauses instead of strings
 type Condition interface {
 	getPreparedStatement() (string, interface{})
 }
@@ -35,26 +34,22 @@ type OrConditions struct {
 	andConditions []AndConditions
 }
 
-// db.Where("name = ?", "jinzhu").First(&user)
 type SearchOperatorCondition struct {
 	field    string
 	operator string
 	value    interface{}
 }
 
-// db.Where("name IN ?", []string{"jinzhu", "jinzhu 2"}).Find(&users)
 type SearchInCondition struct {
 	field  string
 	values []interface{}
 }
 
-// db.Where("name LIKE ?", "%jin%").Find(&users)
 type SearchLikeCondition struct {
 	field string
 	regex string
 }
 
-//db.Where("created_at BETWEEN ? AND ?", lastWeek, today).Find(&users)
 type SearchBetweenCondition struct {
 	field      string
 	lowerValue interface{}
