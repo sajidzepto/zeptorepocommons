@@ -1,4 +1,4 @@
-package zeptobaserepo
+package zeptorepocommons
 
 import (
 	"gorm.io/gorm"
@@ -29,7 +29,7 @@ type BaseRepo struct {
 	db            *gorm.DB
 }
 
-func getRepo(db *gorm.DB, typ reflect.Type) *BaseRepo {
+func GetRepo(db *gorm.DB, typ reflect.Type) *BaseRepo {
 	DefaultBatchCreateSize = 100
 	DefaultPageSize = 100
 	return &BaseRepo{db: db, baseModelType: typ}
@@ -115,6 +115,7 @@ func (bmr BaseRepo) Query(query *Query) (*PaginatorQueryResult, error) {
 }
 
 func (bmr BaseRepo) Update(value interface{}) error {
+
 	result := bmr.db.Updates(value)
 	if result.Error != nil {
 		return result.Error

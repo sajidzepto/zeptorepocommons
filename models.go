@@ -1,4 +1,4 @@
-package models
+package zeptorepocommons
 
 import (
 	"gorm.io/gorm"
@@ -6,5 +6,5 @@ import (
 
 type BaseModel struct {
 	gorm.Model
-	Version uint
+	Version uint `gorm:"autoIncrement"`
 }

@@ -1,4 +1,4 @@
-package zeptobaserepo
+package zeptorepocommons
 
 import (
 	"encoding/json"
@@ -24,14 +24,14 @@ func init() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	//db.AutoMigrate(&Rider{}, &RiderVendor{}, &IdentificationModel{}, &AddressModel{}, &StoreModel{})
-	//db.AutoMigrate(&RiderEnv{})
-	riderRepo = &RiderRepo{getRepo(db, reflect.TypeOf(Rider{}))}
-	riderEnvRepo = &RiderEnvRepo{getRepo(db, reflect.TypeOf(Rider{}))}
-	riderVendorRepo = &RiderVendorRepo{getRepo(db, reflect.TypeOf(RiderVendor{}))}
-	identificationModelRepo = &IdentificationModelRepo{getRepo(db, reflect.TypeOf(IdentificationModel{}))}
-	addressRepo = &AddressRepo{getRepo(db, reflect.TypeOf(AddressModel{}))}
-	storeModelRepo = &StoreModelRepo{getRepo(db, reflect.TypeOf(StoreModel{}))}
+	db.AutoMigrate(&Rider{}, &RiderVendor{}, &IdentificationModel{}, &AddressModel{}, &StoreModel{})
+	db.AutoMigrate(&RiderEnv{})
+	riderRepo = &RiderRepo{GetRepo(db, reflect.TypeOf(Rider{}))}
+	riderEnvRepo = &RiderEnvRepo{GetRepo(db, reflect.TypeOf(Rider{}))}
+	riderVendorRepo = &RiderVendorRepo{GetRepo(db, reflect.TypeOf(RiderVendor{}))}
+	identificationModelRepo = &IdentificationModelRepo{GetRepo(db, reflect.TypeOf(IdentificationModel{}))}
+	addressRepo = &AddressRepo{GetRepo(db, reflect.TypeOf(AddressModel{}))}
+	storeModelRepo = &StoreModelRepo{GetRepo(db, reflect.TypeOf(StoreModel{}))}
 }
 
 func getSampleRider() *Rider {

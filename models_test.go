@@ -1,9 +1,7 @@
-package zeptobaserepo
-
-import "zeptobaserepo/models"
+package zeptorepocommons
 
 type Rider struct {
-	models.BaseModel
+	BaseModel
 	Name     string
 	Phone    string
 	VendorId uint
@@ -18,20 +16,20 @@ type Rider struct {
 }
 
 type RiderVendor struct {
-	models.BaseModel
+	BaseModel
 	Name  string
 	Phone string
 }
 
 type IdentificationModel struct {
-	models.BaseModel
+	BaseModel
 	IdentificationType string
 	IdentificationId   string
 	RiderId            uint
 }
 
 type AddressModel struct {
-	models.BaseModel
+	BaseModel
 	AddressString string
 	City          string
 	Pincode       string
@@ -39,12 +37,13 @@ type AddressModel struct {
 }
 
 type StoreModel struct {
-	models.BaseModel
+	BaseModel
 	Pincode string
 }
 
 type RiderRepo struct {
 	*BaseRepo
+	// Addition methods if needed can be added.
 }
 
 type RiderEnvRepo struct {

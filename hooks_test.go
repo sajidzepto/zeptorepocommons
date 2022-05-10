@@ -1,4 +1,4 @@
-package zeptobaserepo
+package zeptorepocommons
 
 import (
 	"encoding/json"
@@ -6,7 +6,8 @@ import (
 )
 
 type RiderEnv struct {
-	gorm.Model
+	PID   uint  `gorm:"primarykey"`
+	Rider Rider `gorm:"embedded;embeddedPrefix:rider_"`
 }
 
 func init() {
@@ -15,12 +16,12 @@ func init() {
 
 func (rider *Rider) AfterCreate(tx *gorm.DB) error {
 
-	// publish events
+	//publish events
 	jsonByte, _ := json.MarshalIndent(rider, "", "")
-	topicStr := "rider-events"
-	rider.PublishEvents(jsonByte, topicStr)
+	rider.PublishEvents(jsonByte)
 
 	// save versions
 	riderEnv := RiderEnv{}
+	dto.Map(&riderEnv, *rider)
 	return riderEnvRepo.Create(&riderEnv)
 }

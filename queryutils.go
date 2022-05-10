@@ -1,4 +1,4 @@
-package zeptobaserepo
+package zeptorepocommons
 
 import "strings"
 
