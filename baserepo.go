@@ -26,17 +26,17 @@ var (
 
 type BaseRepo struct {
 	baseModelType reflect.Type
-	db            *gorm.DB
+	DB            *gorm.DB
 }
 
 func GetRepo(db *gorm.DB, typ reflect.Type) *BaseRepo {
 	DefaultBatchCreateSize = 100
 	DefaultPageSize = 100
-	return &BaseRepo{db: db, baseModelType: typ}
+	return &BaseRepo{DB: db, baseModelType: typ}
 }
 
 func (bmr BaseRepo) Create(value any) error {
-	result := bmr.db.Create(value)
+	result := bmr.DB.Create(value)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -44,7 +44,7 @@ func (bmr BaseRepo) Create(value any) error {
 }
 
 func (bmr BaseRepo) BatchCreate(value any) error {
-	result := bmr.db.CreateInBatches(value, DefaultBatchCreateSize)
+	result := bmr.DB.CreateInBatches(value, DefaultBatchCreateSize)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -53,7 +53,7 @@ func (bmr BaseRepo) BatchCreate(value any) error {
 
 func (bmr BaseRepo) FindById(id uint) (any, error) {
 	value := reflect.New(bmr.baseModelType).Interface()
-	result := bmr.db.
+	result := bmr.DB.
 		Preload(clause.Associations).
 		Find(value, id)
 	if result.Error != nil {
@@ -69,7 +69,7 @@ func (bmr BaseRepo) FindAll(offset int) (*PaginatorQueryResult, error) {
 
 	values := reflect.New(reflect.SliceOf(bmr.baseModelType)).Interface()
 	nextOffset := offset + DefaultPageSize + 1
-	result := bmr.db.
+	result := bmr.DB.
 		Preload(clause.Associations).
 		Offset(offset).Limit(DefaultPageSize).
 		Find(values)
@@ -90,7 +90,7 @@ func (bmr BaseRepo) Query(query *Query) (*PaginatorQueryResult, error) {
 	}
 	values := reflect.New(reflect.SliceOf(bmr.baseModelType)).Interface()
 
-	db := bmr.db.
+	db := bmr.DB.
 		Preload(clause.Associations).
 		Where(query.queryCondition.getPreparedStatement()).
 		Offset(offset).
@@ -116,7 +116,7 @@ func (bmr BaseRepo) Query(query *Query) (*PaginatorQueryResult, error) {
 
 func (bmr BaseRepo) Update(value interface{}) error {
 
-	result := bmr.db.Updates(value)
+	result := bmr.DB.Updates(value)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -126,7 +126,7 @@ func (bmr BaseRepo) Update(value interface{}) error {
 func (bmr BaseRepo) UpdateSpecificFields(id uint, fields map[string]interface{}) error {
 	res, _ := bmr.FindById(id)
 	if res != nil {
-		result := bmr.db.Model(res).Updates(fields)
+		result := bmr.DB.Model(res).Updates(fields)
 		if result.Error != nil {
 			return result.Error
 		}
@@ -136,7 +136,7 @@ func (bmr BaseRepo) UpdateSpecificFields(id uint, fields map[string]interface{})
 }
 
 func (bmr BaseRepo) Delete(value interface{}) error {
-	result := bmr.db.Delete(value)
+	result := bmr.DB.Delete(value)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -145,7 +145,7 @@ func (bmr BaseRepo) Delete(value interface{}) error {
 
 func (bmr BaseRepo) DeleteALl() error {
 	value := reflect.New(bmr.baseModelType).Interface()
-	result := bmr.db.Where("1 = 1").Delete(value)
+	result := bmr.DB.Where("1 = 1").Delete(value)
 	if result.Error != nil {
 		return result.Error
 	}

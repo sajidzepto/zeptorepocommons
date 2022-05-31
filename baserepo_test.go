@@ -128,9 +128,9 @@ func TestBaseRepo_FindById(t *testing.T) {
 func TestBaseRepo_FindAll(t *testing.T) {
 	paginatedResult, err := riderRepo.FindAll(0)
 	assert.Nil(t, err)
-	//t.Logf("the fetched entities is \n %+v \n", prettyPrint(paginatedResult.values))
-	assert.Equal(t, len(*(paginatedResult.values).(*[]Rider)), DefaultPageSize)
-	assert.Equal(t, paginatedResult.nextOffset, 101)
+	//t.Logf("the fetched entities is \n %+v \n", prettyPrint(paginatedResult.Values))
+	assert.Equal(t, len(*(paginatedResult.Values).(*[]Rider)), DefaultPageSize)
+	assert.Equal(t, paginatedResult.NextOffSet, 101)
 }
 
 func TestBaseRepo_Query(t *testing.T) {
@@ -157,9 +157,9 @@ func TestBaseRepo_Query(t *testing.T) {
 	}
 	paginatedResult, err := riderRepo.Query(&query)
 	assert.Nil(t, err)
-	//t.Logf("the fetched entities is \n %+v \n", prettyPrint(paginatedResult.values))
-	assert.Equal(t, len(*(paginatedResult.values).(*[]Rider)), 100)
-	assert.Equal(t, paginatedResult.nextOffset, 101)
+	//t.Logf("the fetched entities is \n %+v \n", prettyPrint(paginatedResult.Values))
+	assert.Equal(t, len(*(paginatedResult.Values).(*[]Rider)), 100)
+	assert.Equal(t, paginatedResult.NextOffSet, 101)
 }
 
 func TestBaseRepo_Update(t *testing.T) {
@@ -201,5 +201,5 @@ func TestBaseRepo_DeleteAll(t *testing.T) {
 	pgqr, err := riderRepo.FindAll(0)
 	t.Logf("The default page size is %d", DefaultPageSize)
 	assert.Nil(t, err)
-	assert.Equal(t, len(*(pgqr.values).(*[]Rider)), 0)
+	assert.Equal(t, len(*(pgqr.Values).(*[]Rider)), 0)
 }

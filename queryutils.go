@@ -18,8 +18,8 @@ type PageConfig struct {
 }
 
 type PaginatorQueryResult struct {
-	values     interface{}
-	nextOffset int
+	Values     interface{}
+	NextOffSet int
 }
 
 type Condition interface {
