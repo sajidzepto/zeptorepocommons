@@ -43,6 +43,14 @@ func (bmr BaseRepo) Create(value any) error {
 	return nil
 }
 
+func (bmr BaseRepo) CreateInTransaction(value any, tx *gorm.DB) error {
+	result := tx.Create(value)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (bmr BaseRepo) BatchCreate(value any) error {
 	result := bmr.DB.CreateInBatches(value, DefaultBatchCreateSize)
 	if result.Error != nil {
